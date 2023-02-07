@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
 
@@ -31,6 +32,15 @@ public class DBConfig {
             throw new DBException(e.getMessage());
         }
     } */
+
+    public static void closeResultSet(ResultSet rs) {
+	    try {
+            if(rs != null && !rs.isClosed())
+			    rs.close();
+		} catch (SQLException e) {
+		    throw new DBException(e.getMessage());
+		}
+	}
     
     private static Properties loadProperties() {
         try (FileInputStream fileIn = new FileInputStream("./properties/database.properties")) {

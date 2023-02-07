@@ -1,18 +1,12 @@
 package app;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import model.entities.Department;
+import model.dao.DaoFactory;
+import model.dao.GenericDao;
 import model.entities.Seller;
 
 public class App {
-    public static void main(String[] args) throws Exception {
-        Department dpt = new Department(1, "Computers");
-
-        Seller seller = new Seller(21, "Lionel", "lionel@gmail.com", LocalDate.now(), BigDecimal.valueOf(2200), dpt);
-
-        System.out.println(dpt);
-        System.out.println();
-        System.out.println(seller);       
+    public static void main(String[] args) {
+        GenericDao<Seller> seller = DaoFactory.createSellerDao();
+        System.out.println(seller.findById(7));
     }
 }
