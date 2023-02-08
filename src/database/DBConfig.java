@@ -37,7 +37,8 @@ public class DBConfig {
 	    try {
             if(rs != null && !rs.isClosed())
 			    rs.close();
-		} catch (SQLException e) {
+		} 
+        catch(SQLException e) {
 		    throw new DBException(e.getMessage());
 		}
 	}
