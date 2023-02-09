@@ -4,11 +4,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
 import database.DBConfig;
 import database.DBException;
 import model.dao.GenericDao;
@@ -23,13 +23,48 @@ public class SellerDaoImplJDBC implements GenericDao<Seller>{
     }
 
     @Override
-    public void insert(Seller object) {
-        // TODO Auto-generated method stub
-        
+    public void insert(Seller seller) { //inserir seller NO BANCO DE DADOS
+        String query = "INSERT INTO seller VALUES (DEFAULT, ?, ?, ?, ?, ?)";
+        ResultSet rs = null;
+
+        try(PreparedStatement pstmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+            conn.setAutoCommit(false);
+
+            pstmt.setString(1, seller.getName());
+            pstmt.setString(2, seller.getEmail());
+            pstmt.setObject(3, seller.getBirthDate());
+            pstmt.setBigDecimal(4, seller.getBaseSalary());
+            pstmt.setInt(5, seller.getDepartment().getId());
+            int rowsAffected = pstmt.executeUpdate();
+
+            if(rowsAffected > 0) {
+                ResultSet rowsResult = pstmt.getGeneratedKeys();
+                if(rowsResult.next()) {
+                    seller.setId(rowsResult.getInt(1));
+                }
+                conn.commit();
+                DBConfig.closeResultSet(rowsResult);
+            }
+            else {
+                conn.rollback();
+                throw new DBException("Unexpected error: no rows affected");
+            }      
+        }
+        catch(SQLException e) {
+            try {
+                conn.rollback();
+            } catch (SQLException e1) {
+                throw new DBException("ERROR in rollback: " + e1.getMessage());
+            }
+            throw new DBException(e.getMessage());
+        }
+        finally {
+            DBConfig.closeResultSet(rs);
+        }
     }
 
     @Override
-    public void update(Seller object) {
+    public void update(Seller seller) {
         // TODO Auto-generated method stub
         
     }
