@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.LinkedList;
 import java.util.List;
 import database.DBConfig;
 import database.DBException;
@@ -82,4 +83,54 @@ public class SellerDaoImplJDBC implements GenericDao<Seller>{
         // TODO Auto-generated method stub
         return null;
     }   
+
+    @Override
+    public List<Seller> findByDepartment(Integer departmentId) {
+        List<Seller> sellerList = new LinkedList<>();
+        String query = "SELECT seller.*, department.Name AS Department FROM seller JOIN department " + 
+                       "ON seller.DepartmentId = department.Id WHERE seller.DepartmentId = ? ORDER BY seller.Name";
+        ResultSet rs = null;
+
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setInt(1, departmentId);
+            rs = pstmt.executeQuery();
+
+            if(rs.isBeforeFirst()) {
+                Department department = instantiateDepartmentById(departmentId);
+                while(rs.next()) {
+                    sellerList.add(instantiateSeller(rs, department));
+                }
+            }
+            return sellerList;
+        }
+        catch(SQLException e) {
+            throw new DBException(e.getMessage());
+        }
+        finally {
+            DBConfig.closeResultSet(rs);
+        } 
+    }
+    private Department instantiateDepartmentById(Integer departmentId) {
+        String query = "SELECT * FROM department WHERE Id = ?";
+        ResultSet rs = null;
+
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setInt(1, departmentId);
+            rs = pstmt.executeQuery();
+
+            if(rs.next()) {
+                Department department = new Department();
+                department.setId(rs.getInt("Id"));
+                department.setName(rs.getString("Name"));
+                return department;
+            }
+            return null;
+        }
+        catch(SQLException e) {
+            throw new DBException(e.getMessage());
+        }
+        finally {
+            DBConfig.closeResultSet(rs);
+        }
+    }
 }
