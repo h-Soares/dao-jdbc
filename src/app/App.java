@@ -3,11 +3,11 @@ package app;
 import java.util.List;
 import model.dao.DaoFactory;
 import model.dao.GenericDao;
+import model.entities.Department;
 import model.entities.Seller;
 /* import model.entities.Department;
-import java.math.BigDecimal;
 import java.time.LocalDate; */
-
+import java.math.BigDecimal;
 
 public class App {
     public static void main(String[] args) {
@@ -40,5 +40,12 @@ public class App {
         Seller seller = new Seller("Pompew", "pompew@gmail.com", LocalDate.now(), BigDecimal.valueOf(1400), dpt);
         sellerDao.insert(seller);
         System.out.println("Inserted! Seller id: " + seller.getId()); FUNCIONOU! */ 
+        System.out.println();
+
+        System.out.println("---- TEST 5: Seller update method ----");
+        Seller seller = sellerDao.findById(13);
+        seller.setBaseSalary(BigDecimal.valueOf(4200));
+        seller.setDepartment(new Department(4));
+        sellerDao.update(seller);
     }
 }

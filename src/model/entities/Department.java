@@ -9,9 +9,8 @@ public class Department implements Serializable { //para ser gravado como uma se
     public Department() {
     }
 
-    public Department(Integer id, String name) {
+    public Department(Integer id) {
         this.id = id;
-        this.name = name;
     }
 
     @Override

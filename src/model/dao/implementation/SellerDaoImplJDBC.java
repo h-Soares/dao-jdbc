@@ -65,8 +65,26 @@ public class SellerDaoImplJDBC implements GenericDao<Seller>{
 
     @Override
     public void update(Seller seller) {
-        // TODO Auto-generated method stub
-        
+        String query = "UPDATE seller SET Name = ?, Email = ?, BirthDate = ?, BaseSalary = ?, " + 
+                       "DepartmentId = ? WHERE Id = ?";
+        ResultSet rs = null;
+
+        try(PreparedStatement pstmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setString(1, seller.getName());
+            pstmt.setString(2, seller.getEmail());
+            pstmt.setObject(3, seller.getBirthDate());
+            pstmt.setBigDecimal(4, seller.getBaseSalary());
+            pstmt.setInt(5, seller.getDepartment().getId());
+            pstmt.setInt(6, seller.getId());
+            pstmt.executeUpdate();
+
+        }
+        catch(SQLException e) {
+            throw new DBException(e.getMessage());
+        }
+        finally {
+            DBConfig.closeResultSet(rs);
+        }
     }
 
     @Override
