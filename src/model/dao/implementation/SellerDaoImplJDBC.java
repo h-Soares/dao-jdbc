@@ -77,7 +77,6 @@ public class SellerDaoImplJDBC implements GenericDao<Seller>{
             pstmt.setInt(5, seller.getDepartment().getId());
             pstmt.setInt(6, seller.getId());
             pstmt.executeUpdate();
-
         }
         catch(SQLException e) {
             throw new DBException(e.getMessage());
@@ -89,8 +88,22 @@ public class SellerDaoImplJDBC implements GenericDao<Seller>{
 
     @Override
     public void deleteById(Integer ID) {
-        // TODO Auto-generated method stub
-        
+        String query = "DELETE FROM seller WHERE Id = ?";
+        ResultSet rs = null;
+
+        try(PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setInt(1, ID);
+            int rowsAffected = pstmt.executeUpdate();
+
+            if(rowsAffected == 0)
+                throw new IllegalArgumentException("Id " + ID + " doesn't exists");
+        }
+        catch(SQLException e) {
+            throw new DBException(e.getMessage());
+        }
+        finally {
+            DBConfig.closeResultSet(rs);
+        } 
     }
 
     @Override

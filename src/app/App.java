@@ -47,5 +47,11 @@ public class App {
         seller.setBaseSalary(BigDecimal.valueOf(4200));
         seller.setDepartment(new Department(4));
         sellerDao.update(seller);
+        System.out.println();
+
+        System.out.println("---- TEST 6: Seller deleteById method ----");
+        //Seller seller = new Seller("Test", "test@gmail.com", LocalDate.now(), BigDecimal.valueOf(1400), new Department(4));
+        //sellerDao.insert(seller);
+        //sellerDao.deleteById(15);
     }
 }
