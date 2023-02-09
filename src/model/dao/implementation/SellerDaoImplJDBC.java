@@ -4,8 +4,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+
 import database.DBConfig;
 import database.DBException;
 import model.dao.GenericDao;
@@ -39,7 +42,8 @@ public class SellerDaoImplJDBC implements GenericDao<Seller>{
 
     @Override
     public Seller findById(Integer ID) {
-        String query = "SELECT seller.*, department.Name AS Department FROM seller JOIN department ON seller.DepartmentId = department.Id  WHERE seller.Id = ?";
+        String query = "SELECT seller.*, department.Name AS Department FROM seller JOIN department ON " + 
+                       "seller.DepartmentId = department.Id  WHERE seller.Id = ?";
         ResultSet rs = null;
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setInt(1, ID);
@@ -80,13 +84,37 @@ public class SellerDaoImplJDBC implements GenericDao<Seller>{
 
     @Override
     public List<Seller> findAll() {
-        // TODO Auto-generated method stub
-        return null;
+        String query = "SELECT seller.*, department.Name AS Department FROM seller JOIN department ON " +
+                       "seller.DepartmentId = department.Id ORDER BY seller.Name";
+        ResultSet rs = null;
+
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            rs = pstmt.executeQuery();
+
+            List<Seller> sellers = new LinkedList<>();
+            Map<Integer, Department> departments = new HashMap<>(); //para ter apenas um objeto department para cada department.
+
+            while(rs.next()) {
+                Department department = departments.get(rs.getInt("DepartmentId")); //se já existir, pega ele, NÃO CRIA UM NOVO.
+
+                if(department == null) { //Se não existir, cria um novo e coloca no Map para não se repetir.
+                    department = instantiateDepartment(rs);
+                    departments.put(rs.getInt("DepartmentId"), department);
+                }
+                sellers.add(instantiateSeller(rs, department));
+            }
+            return sellers;
+        }
+        catch(SQLException e) {
+            throw new DBException(e.getMessage());
+        }
+        finally {
+            DBConfig.closeResultSet(rs);
+        }
     }   
 
     @Override
     public List<Seller> findByDepartment(Integer departmentId) {
-        List<Seller> sellerList = new LinkedList<>();
         String query = "SELECT seller.*, department.Name AS Department FROM seller JOIN department " + 
                        "ON seller.DepartmentId = department.Id WHERE seller.DepartmentId = ? ORDER BY seller.Name";
         ResultSet rs = null;
@@ -95,6 +123,7 @@ public class SellerDaoImplJDBC implements GenericDao<Seller>{
             pstmt.setInt(1, departmentId);
             rs = pstmt.executeQuery();
 
+            List<Seller> sellerList = new LinkedList<>();
             if(rs.isBeforeFirst()) {
                 Department department = instantiateDepartmentById(departmentId);
                 while(rs.next()) {
@@ -111,7 +140,7 @@ public class SellerDaoImplJDBC implements GenericDao<Seller>{
         } 
     }
     private Department instantiateDepartmentById(Integer departmentId) {
-        String query = "SELECT * FROM department WHERE Id = ?";
+        String query = "SELECT Id AS DepartmentId, Name AS Department FROM department WHERE Id = ?";
         ResultSet rs = null;
 
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
@@ -119,9 +148,7 @@ public class SellerDaoImplJDBC implements GenericDao<Seller>{
             rs = pstmt.executeQuery();
 
             if(rs.next()) {
-                Department department = new Department();
-                department.setId(rs.getInt("Id"));
-                department.setName(rs.getString("Name"));
+                Department department = instantiateDepartment(rs);
                 return department;
             }
             return null;
