@@ -1,7 +1,6 @@
 package model.dao;
 
 import java.util.List;
-import model.entities.Seller;
 
 public interface GenericDao<T> {
     void insert(T object);
@@ -9,5 +8,5 @@ public interface GenericDao<T> {
     void deleteById(Integer ID);
     T findById(Integer ID);
     List<T> findAll();
-    List<Seller> findByDepartment(Integer departmentId); //mudar isso depois, talvez.
+    List<T> findByDepartment(Integer departmentId); //não é o ideal para esse caso.
 }

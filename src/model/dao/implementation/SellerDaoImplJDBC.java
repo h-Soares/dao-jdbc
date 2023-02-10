@@ -15,7 +15,7 @@ import model.dao.GenericDao;
 import model.entities.Department;
 import model.entities.Seller;
 
-public class SellerDaoImplJDBC implements GenericDao<Seller>{
+public class SellerDaoImplJDBC implements GenericDao<Seller> {
     private Connection conn; 
 
     public SellerDaoImplJDBC(Connection conn) {
@@ -69,7 +69,7 @@ public class SellerDaoImplJDBC implements GenericDao<Seller>{
                        "DepartmentId = ? WHERE Id = ?";
         ResultSet rs = null;
 
-        try(PreparedStatement pstmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+        try(PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setString(1, seller.getName());
             pstmt.setString(2, seller.getEmail());
             pstmt.setObject(3, seller.getBirthDate());
@@ -96,7 +96,7 @@ public class SellerDaoImplJDBC implements GenericDao<Seller>{
             int rowsAffected = pstmt.executeUpdate();
 
             if(rowsAffected == 0)
-                throw new IllegalArgumentException("Id " + ID + " doesn't exists");
+                throw new IllegalArgumentException("Seller with Id " + ID + " doesn't exists");
             DaoImplService.reorganizeTable(pstmt);
         }
         catch(SQLException e) {
