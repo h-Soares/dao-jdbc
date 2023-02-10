@@ -97,6 +97,7 @@ public class SellerDaoImplJDBC implements GenericDao<Seller>{
 
             if(rowsAffected == 0)
                 throw new IllegalArgumentException("Id " + ID + " doesn't exists");
+            DaoImplService.reorganizeTable(pstmt);
         }
         catch(SQLException e) {
             throw new DBException(e.getMessage());
@@ -116,8 +117,8 @@ public class SellerDaoImplJDBC implements GenericDao<Seller>{
             rs = pstmt.executeQuery();
 
             if(rs.next()) {
-                Department department = instantiateDepartment(rs);
-                Seller seller = instantiateSeller(rs, department);
+                Department department = DaoImplService.instantiateDepartment(rs);
+                Seller seller = DaoImplService.instantiateSeller(rs, department);
                 return seller;
             }
             return null;
@@ -128,24 +129,6 @@ public class SellerDaoImplJDBC implements GenericDao<Seller>{
         finally {
             DBConfig.closeResultSet(rs);
         }
-    }
-
-    private Department instantiateDepartment(ResultSet rs) throws SQLException { //talvez depois colocar na classe responsável.
-        Department department = new Department();
-        department.setId(rs.getInt("DepartmentId"));
-        department.setName(rs.getString("Department"));
-        return department;
-    }
-
-    private Seller instantiateSeller(ResultSet rs, Department department) throws SQLException {
-        Seller seller = new Seller();
-        seller.setId(rs.getInt("Id"));
-        seller.setName(rs.getString("Name"));
-        seller.setEmail(rs.getString("Email"));
-        seller.setBirthDate(rs.getDate("BirthDate").toLocalDate());
-        seller.setBaseSalary(rs.getBigDecimal("BaseSalary"));
-        seller.setDepartment(department);
-        return seller;
     }
 
     @Override
@@ -164,10 +147,10 @@ public class SellerDaoImplJDBC implements GenericDao<Seller>{
                 Department department = departments.get(rs.getInt("DepartmentId")); //se já existir, pega ele, NÃO CRIA UM NOVO.
 
                 if(department == null) { //Se não existir, cria um novo e coloca no Map para não se repetir.
-                    department = instantiateDepartment(rs);
+                    department = DaoImplService.instantiateDepartment(rs);
                     departments.put(rs.getInt("DepartmentId"), department);
                 }
-                sellers.add(instantiateSeller(rs, department));
+                sellers.add(DaoImplService.instantiateSeller(rs, department));
             }
             return sellers;
         }
@@ -185,15 +168,17 @@ public class SellerDaoImplJDBC implements GenericDao<Seller>{
                        "ON seller.DepartmentId = department.Id WHERE seller.DepartmentId = ? ORDER BY seller.Name";
         ResultSet rs = null;
 
-        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
             pstmt.setInt(1, departmentId);
             rs = pstmt.executeQuery();
 
             List<Seller> sellerList = new LinkedList<>();
             if(rs.isBeforeFirst()) {
-                Department department = instantiateDepartmentById(departmentId);
+                rs.first();
+                Department department = DaoImplService.instantiateDepartment(rs); //apenas UMA instância.
+                rs.beforeFirst();
                 while(rs.next()) {
-                    sellerList.add(instantiateSeller(rs, department));
+                    sellerList.add(DaoImplService.instantiateSeller(rs, department));
                 }
             }
             return sellerList;
@@ -204,26 +189,5 @@ public class SellerDaoImplJDBC implements GenericDao<Seller>{
         finally {
             DBConfig.closeResultSet(rs);
         } 
-    }
-    private Department instantiateDepartmentById(Integer departmentId) {
-        String query = "SELECT Id AS DepartmentId, Name AS Department FROM department WHERE Id = ?";
-        ResultSet rs = null;
-
-        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-            pstmt.setInt(1, departmentId);
-            rs = pstmt.executeQuery();
-
-            if(rs.next()) {
-                Department department = instantiateDepartment(rs);
-                return department;
-            }
-            return null;
-        }
-        catch(SQLException e) {
-            throw new DBException(e.getMessage());
-        }
-        finally {
-            DBConfig.closeResultSet(rs);
-        }
     }
 }

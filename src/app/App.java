@@ -32,7 +32,7 @@ public class App {
         if(test2.isEmpty())
             System.out.println("There is no sellers!");
         else
-            test2.forEach(System.out::println);  //Conferido, mesmo objeto para department!
+            test2.forEach(System.out::println);  //Conferido 2x, mesmo objeto para department!
         System.out.println();
 
         System.out.println("---- TEST 4: Seller insert method ----");
@@ -52,6 +52,6 @@ public class App {
         System.out.println("---- TEST 6: Seller deleteById method ----");
         //Seller seller = new Seller("Test", "test@gmail.com", LocalDate.now(), BigDecimal.valueOf(1400), new Department(4));
         //sellerDao.insert(seller);
-        //sellerDao.deleteById(15);
+        //sellerDao.deleteById(14);
     }
 }
