@@ -23,7 +23,6 @@ public class DepartmentDaoImplJDBC implements GenericDao<Department> {
     @Override
     public void insert(Department department) {
         String query = "INSERT INTO department VALUES (DEFAULT, ?)";
-        ResultSet rs = null;
 
         try(PreparedStatement pstmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             conn.setAutoCommit(false);
@@ -52,9 +51,6 @@ public class DepartmentDaoImplJDBC implements GenericDao<Department> {
             }
             throw new DBException(e.getMessage());
         }
-        finally {
-            DBConfig.closeResultSet(rs);
-        }
     }
 
     @Override
@@ -74,7 +70,6 @@ public class DepartmentDaoImplJDBC implements GenericDao<Department> {
     @Override
     public void deleteById(Integer ID) {
         String query = "DELETE FROM department WHERE Id = ?";
-        ResultSet rs = null;
 
         try(PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setInt(1, ID);
@@ -85,9 +80,6 @@ public class DepartmentDaoImplJDBC implements GenericDao<Department> {
         }
         catch(SQLException e) {
             throw new DBIntegrityException(e.getMessage());
-        }
-        finally {
-            DBConfig.closeResultSet(rs);
         }
     }
 
