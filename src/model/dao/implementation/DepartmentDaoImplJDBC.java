@@ -60,7 +60,6 @@ public class DepartmentDaoImplJDBC implements GenericDao<Department> {
     @Override
     public void update(Department department) {
         String query = "UPDATE department SET Name = ? WHERE Id = ?";
-        ResultSet rs = null;
 
         try(PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setString(1, department.getName());
@@ -69,9 +68,6 @@ public class DepartmentDaoImplJDBC implements GenericDao<Department> {
         }
         catch(SQLException e) {
             throw new DBException(e.getMessage());
-        }
-        finally {
-            DBConfig.closeResultSet(rs);
         }
     }
 
